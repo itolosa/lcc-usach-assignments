@@ -1,8 +1,37 @@
 %{
 #include <stdlib.h>
 
+/* Types */
+
+// Left Parenthesis
+#define LPAR_TYPE 0
+// Right Parenthesis
+#define RPAR_TYPE 1 
+// Operators
+#define OPERATOR_TYPE 2
+// Negation
+#define NEGATION_TYPE 3
+// Statements
+#define STMT_TYPE 4
+
+/* Operator Values */
+
+// And
+#define AND_VALUE 0
+// Or
+#define OR_VALUE 1
+// Implication
+#define IMPL_VALUE 2
+// Dummy
+#define DUMMY_VALUE 3
+
+/* end Types */
+
+
+/* Linked List */
+
 typedef struct {
-  int n;
+  int value;
   int type;
 } pListItem;
 
@@ -12,7 +41,6 @@ typedef struct _pListNode {
   struct _pListNode *prev;
 } pListNode;
 
-//doble enlazada extendida con sentinela
 typedef struct {
   pListNode *curr;
   pListNode *nil;
@@ -21,38 +49,29 @@ typedef struct {
   unsigned int length;
 } tLinkedList;
 
-/*
-//doble enlazada extendida sin sentinela
-typedef struct {
-  pListNode *curr;
-  pListNode *head;
-  pListNode *tail;
-  unsigned int curr_pos;
-  unsigned int length;
-} tLinkedList;
-*/
-
 pListNode *tmp_pListNode;
 
-/*
-//insercion en lista simple con sentinela en posicion actual
-//no insertar en el sentinela, queda la zorra
-//queda el nodo y luego el nil por lo tanto no hacer eso
-int pListInsert(tLinkedList *L, pListItem item){
-  tmp_pListNode = L->curr;
-  L->curr = (pListNode *) malloc(sizeof(pListNode)); // []-> +[]
-  L->curr->data = item; //
-  L->curr->next = tmp_pListNode; // []->[]-> +[]
-  L->curr->prev = L->curr->next->prev;
-  L->curr->next->prev = L->curr;
-  if (L->curr->next != L->nil) //WARNING!!: cuando se inserta en esta condicion queda la REAL zorra!
-      L->curr->prev->next = L->curr;
-  L->length++;
-    return L->curr_pos;
+/* Initialise */
+void pListInit(tLinkedList *L) {
+  L->nil = L->tail = L->curr = (pListNode *) malloc(sizeof(pListNode)); //sentinela
+  L->curr->next = L->curr->prev = L->nil;
+  L->length = 0;
+  L->curr_pos = 0; // lista vacia
 }
-*/
 
-//insercion en lista con sentinela en posicion siguiente
+/* Append Item */
+void pListAppend(tLinkedList *L, pListItem item){
+  tmp_pListNode = L->tail->next;
+  L->tail->next = (pListNode *) malloc(sizeof(pListNode));
+  L->tail->next->prev = L->tail;
+  L->tail = L->tail->next;
+  L->tail->data = item;
+  L->tail->next = tmp_pListNode;
+  L->curr = L->tail;
+  L->length++;
+}
+
+/* Insert Item */
 int pListInsert(tLinkedList *L, pListItem item) {
   tmp_pListNode = L->curr->next;
   L->curr->next = (pListNode *) malloc(sizeof(pListNode)); // []-> +[]
@@ -67,190 +86,8 @@ int pListInsert(tLinkedList *L, pListItem item) {
     return L->curr_pos;
 }
 
-
-
-/*
-
-si esta vacia, cuidado con cola y cabeza
-
-si no esta vacia, pero, la posicion es 0, cuidado con la cabeza
-
-si no pasa nada de eso, insertar normalmente
-*/
-
-/*
-//insercion lista doblemente enlazada abierta sin sentinela en posicion actual
-int pListInsert(tLinkedList *L, pListItem item) {
-  if (L->length == 0) {
-    //cuidado con cola y cabeza
-    L->curr = (pListNode *) malloc(sizeof(pListNode));
-    L->curr->data = item;
-    L->curr->next = L->tail;
-    L->curr->prev = L->head;
-    L->tail = L->curr;
-    L->head = L->curr;
-  } else {
-    //insersion normal
-    tmp_pListNode = L->curr;
-    L->curr = (pListNode *) malloc(sizeof(pListNode));
-    L->curr->data = item;
-    L->curr->next = tmp_pListNode;
-    L->curr->prev = tmp_pListNode->prev;
-    L->curr->next->prev = L->curr;
-    //if (L->curr_pos != 0) { //cuidado con cabeza
-    if (L->head != L->curr) {
-      L->curr->prev->next = L->curr;
-    }
-  }
-  L->length++;
-    return L->curr_pos;
-}
-*/
-
-/*
-si esta vacia cuidado con cola y cabeza
-
-si no esta vacia, pero, esta en la cola, cuidado con la cola
-
-en otro caso si no esta en la cola entonces insertar normalmente
-*/
-/*
-//insercion en lista simple sin sentinela en posicion siguiente
-int pListInsert(tLinkedList *L, pListItem item) {
-  if (L->length == 0) {
-    L->curr = (pListNode *) malloc(sizeof(pListNode));
-    L->curr->data = item;
-    L->curr->next = L->tail;
-    L->curr->prev = L->head;
-    L->tail = L->curr;
-    L->head = L->curr;
-  } else {
-    tmp_pListNode = L->curr->next;
-    L->curr->next = (pListNode *) malloc(sizeof(pListNode));
-    L->curr->next->data = item;
-    L->curr->next->next = tmp_pListNode;
-    L->curr->next->prev = L->curr;
-    //if (L->curr_pos == (L->length-1)) {
-    if (L->curr != L->tail) {
-      L->curr->next->next->prev = L->curr->next;
-    }
-  }
-  L->length++;
-    return L->curr_pos;
-}
-
-*/
-
-//inicializacion para sentinela
-void pListInit(tLinkedList *L) {
-  L->nil = L->tail = L->curr = (pListNode *) malloc(sizeof(pListNode)); //sentinela
-  L->curr->next = L->curr->prev = L->nil;
-  L->length = 0;
-  L->curr_pos = 0; // lista vacia
-}
-
-/*
-//inicializacion sin sentinela
-void pListInit(tLinkedList *L) {
-  L->head = L->tail = L->curr = NULL; //sentinela
-  L->curr->next = L->curr->prev = NULL;
-  L->length = 0;
-  L->curr_pos = 0; // lista vacia
-}
-*/
-//usando sentinela
-void pListMoveToStart(tLinkedList *L) {
-  L->curr = L->nil->next;
-  L->curr_pos = 0;
-}
-
-/*
-//sin sentinela
-void pListMoveToStart(tLinkedList *L) {
-  L->curr = L->head;
-  L->curr_pos = 0;
-}
-*/
-
-//para las dos
-void pListMoveToEnd(tLinkedList *L){
-  L->curr = L->tail;
-  L->curr_pos = L->length-1;
-}
-
-//no circular con centinela
-void pListPrev(tLinkedList *L){
-  if (L->curr != L->nil->next) {
-    L->curr = L->curr->prev;
-    L->curr_pos--;
-  }
-}
-
-/*
-//no circular sin centinela
-void pListPrev(tLinkedList *L){
-  if (L->curr != L->head) {
-    L->curr = L->curr->prev;
-    L->curr_pos--;
-  }
-}
-*/
-/*
-//sin centinela no circular
-void pListNext(tLinkedList *L) {
-  if (L->curr != L->tail) {
-    L->curr = L->curr->next;
-    L->curr_pos++;
-  }
-}
-*/
-
-//ambas
-pListItem pListGetValue(tLinkedList *L) {
-  return L->curr->data;
-}
-
-//con sentinela
-void pListMoveToPos(tLinkedList *L, int pos){
-  int i;
-  if (pos < 0 || pos >= L->length) { return; }
-  L->curr = L->nil->next;
-  L->curr_pos = 0;
-  for (i = 0; i < pos; i++){
-    L->curr = L->curr->next;
-    L->curr_pos++;
-  }
-}
-
-/*
-//sin centinela
-void pListMoveToPos(tLinkedList *L, int pos){
-  int i;
-  if (pos < 0 || pos >= L->length) { return; }
-  L->curr = L->head;
-  L->curr_pos = 0;
-  for (i = 0; i < pos; i++){
-    L->curr = L->curr->next;
-    L->curr_pos++;
-  }
-}
-*/
-/*
-//sin centinela
-void pListRemove(tLinkedList *L)
-{
-  if (L->curr != L->head)
-    L->curr->prev->next = L->curr->next;
-  if (L->curr != L->tail)
-    L->curr->next->prev = L->curr->prev;
-  free((void *) L->curr);
-  L->length--;
-}
-*/
-
-//con sentinela
-void pListRemove(tLinkedList *L)
-{ 
+/* Remove Item */
+void pListRemove(tLinkedList *L) { 
   pListNode *aux;
   if (L->curr != L->nil) {
     L->curr->prev->next = L->curr->next;
@@ -265,7 +102,7 @@ void pListRemove(tLinkedList *L)
   }
 }
 
-//con sentinela
+/* Clear List */
 void pListClear(tLinkedList *L){
   int i;
   L->curr = L->nil->next;
@@ -280,119 +117,326 @@ void pListClear(tLinkedList *L){
   return;
 }
 
-/*
-//sin sentinela
-void pListClear(tLinkedList *L){
-  int i;
-  for (i = 0; i < L->length; ++i){
-    tmp_pListNode = L->head->next;
-    free((void *) L->head);
-    L->head = tmp_pListNode;
-  }
-  L->tail = L->curr = L->head = NULL;
-  L->curr->next = L->curr->prev = NULL;
-  L->length = L->curr_pos = 0;
-  return;
+/* Get Current Element Value */
+pListItem pListGetValue(tLinkedList *L) {
+  return L->curr->data;
 }
-*/
 
+/* Get Length */
 int pListLength(tLinkedList *L) {
   return L->length;
 }
 
-//solo con Sentinela extendida
-void pListAppend(tLinkedList *L, pListItem item){
-  tmp_pListNode = L->tail->next;
-  L->tail->next = (pListNode *) malloc(sizeof(pListNode));
-  L->tail->next->prev = L->tail;
-  L->tail = L->tail->next;
-  L->tail->data = item;
-  L->tail->next = tmp_pListNode;
+/* Move Current Pointer to Start */
+void pListMoveToStart(tLinkedList *L) {
+  L->curr = L->nil->next;
+  L->curr_pos = 0;
+}
+
+/* Move Current Pointer to End */
+void pListMoveToEnd(tLinkedList *L){
   L->curr = L->tail;
-  L->length++;
+  L->curr_pos = L->length-1;
 }
 
-/*
-//sin sentinela extendida
-void pListAppend(tLinkedList *L, pListItem item){
-  if (L->length == 0) {
-    L->tail = (pListNode *) malloc(sizeof(pListNode));
-    L->tail->next = L->tail->prev = NULL;
-    L->head = L->tail;
-  } else {
-    tmp_pListNode = L->tail->next;
-    L->tail->next = (pListNode *) malloc(sizeof(pListNode));
-    L->tail->next->prev = L->tail;
-    L->tail = L->tail->next;
-    L->tail->data = item;
-    L->tail->next = tmp_pListNode;
+/* Move to Previous Item */
+void pListPrev(tLinkedList *L){
+  if (L->curr != L->nil->next) {
+    L->curr = L->curr->prev;
+    L->curr_pos--;
   }
-  L->length++;
 }
-*/
 
+/* Move to Next Item */
+void pListNext(tLinkedList *L){
+  if (L->curr != L->tail){
+    L->curr = L->curr->next;
+    L->curr_pos++;
+  }
+}
+
+/* Move to Custom Position */
+void pListMoveToPos(tLinkedList *L, int pos){
+  int i;
+  if (pos < 0 || pos >= L->length) { return; }
+  L->curr = L->nil->next;
+  L->curr_pos = 0;
+  for (i = 0; i < pos; i++){
+    L->curr = L->curr->next;
+    L->curr_pos++;
+  }
+}
+
+/* Parenthesis Counter */
 int pc = 0;
+
+/* Primary Linked List */
 tLinkedList L1;
+
+/* Secondary Linked List */
 tLinkedList L2;
+
+/* Helper Item */
 pListItem aux;
+
+/* End Linked List */
 
 %}
 
 %%
-                                      
+
                                       pListInit(&L1);
 "\\documentclass"(.|\n)*"\n$$"        ;
 "("                                   {
-                                        aux.n = -pc-5;
-                                        aux.type = 1;
+                                        aux.type = LPAR_TYPE;
+                                        aux.value = pc;
                                         pListAppend(&L1, aux);
                                         pc++;
                                       }
 ")"                                   {
                                         pc--; 
-                                        aux.n = -pc-5;
                                         aux.type = 1;
-                                        pListAppend(&L1, aux);
-                                      }
-[a-zA-Z]                              {
-                                        aux.n = yytext[0];
-                                        aux.type = 2;
+                                        aux.value = pc;
                                         pListAppend(&L1, aux);
                                       }
 "\\rightarrow"                        {
-                                        aux.n = -1;
-                                        aux.type = 3;
+                                        aux.type = OPERATOR_TYPE;
+                                        aux.value = IMPL_VALUE;
                                         pListAppend(&L1, aux);
                                       }
 "\\vee"                               {
-                                        aux.n = -2;
-                                        aux.type = 3;
-                                        pListAppend(&L1, aux);
-                                      }
-"\\neg"                               {
-                                        aux.n = -3;
-                                        aux.type = 3;
+                                        aux.type = OPERATOR_TYPE;
+                                        aux.value = OR_VALUE;
                                         pListAppend(&L1, aux);
                                       }
 "\\wedge"                             {
-                                        aux.n = -4;
-                                        aux.type = 3;
+                                        aux.type = OPERATOR_TYPE;
+                                        aux.value = AND_VALUE;
+                                        pListAppend(&L1, aux);
+                                      }
+"\\neg"                               {
+                                        aux.type = NEGATION_TYPE;
+                                        aux.value = DUMMY_VALUE;
+                                        pListAppend(&L1, aux);
+                                      }
+[a-zA-Z]                              {
+                                        aux.type = STMT_TYPE;
+                                        aux.value = yytext[0];
                                         pListAppend(&L1, aux);
                                       }
 [ \t]+                                ;
 "$$\n"(.|\n)*"\\end{document}"        ;
+
 %%
 
+void IMPL_FREE(tLinkedList *list, tLinkedList *resultList, int start, int end){
+  pListMoveToPos(list,start);
+
+  /* if Statement */
+  if (start >= end-1){
+    pListItem statement;
+    statement.type = STMT_TYPE;
+    statement.value = pListGetValue(list).value;
+
+    pListAppend(resultList, statement);
+    return;
+  } else {
+    /* if Statement and Operator */
+    if (pListGetValue(list).type == STMT_TYPE){
+      pListItem statement;
+      statement.type = STMT_TYPE;
+      statement.value = pListGetValue(list).value;
+
+      pListNext(list);
+      if (pListGetValue(list).type == OPERATOR_TYPE) {
+        int operator_value = pListGetValue(list).value;
+        if (operator_value == IMPL_VALUE){
+          pListItem negation;
+          negation.type = NEGATION_TYPE;
+          negation.value = DUMMY_VALUE;
+          pListAppend(resultList, negation);
+          pListAppend(resultList, statement);
+
+          pListItem or;
+          or.type = OPERATOR_TYPE;
+          or.value = OR_VALUE;
+          pListAppend(resultList, or);
+
+          IMPL_FREE(list, resultList, start+2, end-1);
+        } else if (operator_value == AND_VALUE){
+          pListAppend(resultList, statement);
+
+          pListItem and;
+          and.type = OPERATOR_TYPE;
+          and.value = AND_VALUE;
+          pListAppend(resultList, and);
+
+          IMPL_FREE(list, resultList, start+2, end-1);
+        } else if (operator_value == OR_VALUE) {
+          pListAppend(resultList, statement);
+
+          pListItem or;
+          or.type = OPERATOR_TYPE;
+          or.value = OR_VALUE;
+          pListAppend(resultList, or);
+
+          IMPL_FREE(list, resultList, start+2, end-1);
+        }
+      } else {
+        printf("Malformed Expression!!\n"); printf("Start: %d & End: %d", start, end);
+        exit(0);
+      }
+    /* if Negation of Statement */
+    } else if (pListGetValue(list).type == NEGATION_TYPE) {
+      pListItem negation;
+      negation.type = NEGATION_TYPE;
+      negation.value = DUMMY_VALUE;
+      pListAppend(resultList, negation);
+
+      IMPL_FREE(list, resultList, start+1, end-1);
+      
+    /* if Left Parenthesis */
+    } else if (pListGetValue(list).type == LPAR_TYPE){
+      int START_PARENTHESIS = start;
+      int END_PARENTHESIS;
+      int PARENTHESIS_LEVEL = pListGetValue(list).value;
+      
+      int i;
+      for (i=start+1; i < end; i++){  
+        if (pListGetValue(list).type == RPAR_TYPE && pListGetValue(list).value == PARENTHESIS_LEVEL) {
+          END_PARENTHESIS = i;
+          
+          pListNext(list);
+          printf("Operador %d", pListGetValue(list).type);
+          if (pListGetValue(list).type == OPERATOR_TYPE) {
+            printf(" Operador ");
+            int operator_value = pListGetValue(list).value;
+            if (operator_value == IMPL_VALUE){
+              pListItem negation;
+              negation.type = NEGATION_TYPE;
+              negation.value = DUMMY_VALUE;
+              pListAppend(resultList, negation);
+              
+              pListItem left_parenthesis;
+              left_parenthesis.type = LPAR_TYPE;
+              left_parenthesis.value = PARENTHESIS_LEVEL;
+              pListAppend(resultList, left_parenthesis);
+
+              IMPL_FREE(list, resultList, START_PARENTHESIS+1, END_PARENTHESIS-1);
+
+              pListItem right_parenthesis;
+              right_parenthesis.type = RPAR_TYPE;
+              right_parenthesis.value = PARENTHESIS_LEVEL;
+              pListAppend(resultList, right_parenthesis);
+
+              pListItem or;
+              or.type = OPERATOR_TYPE;
+              or.value = OR_VALUE;
+              pListAppend(resultList, or);
+
+              IMPL_FREE(list, resultList, END_PARENTHESIS+2, end);
+            } else if (operator_value == AND_VALUE){
+              pListItem left_parenthesis;
+              left_parenthesis.type = LPAR_TYPE;
+              left_parenthesis.value = PARENTHESIS_LEVEL;
+              pListAppend(resultList, left_parenthesis);
+
+              IMPL_FREE(list, resultList, START_PARENTHESIS+1, END_PARENTHESIS-1);
+
+              pListItem right_parenthesis;
+              right_parenthesis.type = RPAR_TYPE;
+              right_parenthesis.value = PARENTHESIS_LEVEL;
+              pListAppend(resultList, right_parenthesis);
+
+              pListItem and;
+              and.type = OPERATOR_TYPE;
+              and.value = AND_VALUE;
+              pListAppend(resultList, and);
+
+              IMPL_FREE(list, resultList, END_PARENTHESIS+2, end);
+            } else if (operator_value == OR_VALUE) {
+              pListItem left_parenthesis;
+              left_parenthesis.type = LPAR_TYPE;
+              left_parenthesis.value = PARENTHESIS_LEVEL;
+              pListAppend(resultList, left_parenthesis);
+
+              IMPL_FREE(list, resultList, START_PARENTHESIS+1, END_PARENTHESIS-1);
+
+              pListItem right_parenthesis;
+              right_parenthesis.type = RPAR_TYPE;
+              right_parenthesis.value = PARENTHESIS_LEVEL;
+              pListAppend(resultList, right_parenthesis);
+
+              pListItem or;
+              or.type = OPERATOR_TYPE;
+              or.value = OR_VALUE;
+              pListAppend(resultList, or);
+
+              IMPL_FREE(list, resultList, END_PARENTHESIS+2, end);
+            }
+          } else {
+            printf("Malformed Expression!!\n"); printf("Start: %d & End: %d", start, end);
+            exit(0);
+          }
+        }
+        pListNext(list);
+      }
+    } else {
+      printf("Malformed Expression!!\n"); printf("Start: %d & End: %d", start, end);
+      exit(0);
+    }
+  }
+}
 
 int yywrap() {
+  pListMoveToStart(&L1);
+
   int i;
-  int l = pListLength(&L1);
+  int l = pListLength(&L2);
   printf("\n\n\n");
+  int type;
+  int value;
+
+  pListMoveToStart(&L1);
+  for (i = 0; i < pListLength(&L1); i++){
+    printf("\t%d\t", pListGetValue(&L1).type );
+    pListNext(&L1);
+  }
+  printf("\n");
+  pListMoveToStart(&L1);
+  for (i = 0; i < pListLength(&L1); i++){
+   printf("\t%d\t", pListGetValue(&L1).value );
+    pListNext(&L1); 
+  }
+  printf("\n");
+
+  pListInit(&L2);
+  IMPL_FREE(&L1, &L2, 0, pListLength(&L1));
+
+  pListMoveToStart(&L2);
   for (i = 0; i < l; i++){
-    printf(" %d ", pListGetValue(&L1).n);
-    pListRemove(&L1);
-    pListMoveToStart(&L1);
+    type = pListGetValue(&L2).type;
+    value = pListGetValue(&L2).value;
+
+    if (type == STMT_TYPE){
+      printf(" %c ", value);
+    } else if (type == OPERATOR_TYPE) {
+      if (value == AND_VALUE){
+        printf(" & ");
+      } else if (value == OR_VALUE){
+        printf(" || ");
+      } else {
+        printf(" -> ");
+      }
+    } else if (type == NEGATION_TYPE){
+      printf(" ~ ");
+    } else if (type == LPAR_TYPE) {
+      printf(" ( ");
+    } else if (type == RPAR_TYPE) {
+      printf(" ) ");
+    } 
+
+    pListNext(&L2);
   }
   return 1;
 }
-
