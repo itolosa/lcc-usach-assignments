@@ -1,7 +1,16 @@
 
 
 
-	0		0		0		4		  2		4		  1		2		0		4		2		3		4		1		1		2		0		4		2		4		1		1		2		0		3		4		2		4		1	
-	0		1		2		112		2		113		2		1		2		112		2		3		114		2		1		0		1		114		2		112		1		0		0		0		3		112		2		113		0	
-Operador 2 Operador Operador 2 Operador Operador 2 Operador Operador 1Malformed Expression!!
-Start: 2 & End: 14
+Start: 0 - End: 28
+Start: 1 - End: 20
+Start: 2 - End: 13
+Start: 3 - End: 5
+Start: 5 - End: 5
+Start: 9 - End: 12
+Start: 12 - End: 12
+Start: 17 - End: 19
+Start: 19 - End: 19
+Start: 24 - End: 27
+Start: 25 - End: 27
+Start: 27 - End: 27
+ (  (  (  ~  p  ||  q  )  ||  (  ~  p  ||  ~  r  )  )  &  (  ~  r  ||  p  )  )  &  (  ~  ~  p  ||  q  ) 
