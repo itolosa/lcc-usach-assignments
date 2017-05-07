@@ -2037,107 +2037,130 @@ void NNF(tLinkedList *list, tLinkedList *resultList, int start, int end);
 void dNNF(tLinkedList *list, tLinkedList *resultList, int start, int end);
 void CNF(tLinkedList *list, tLinkedList *resultList, int start, int end);
 
-int yywrap() {
+int main(int argc, char const *argv[]){
+  yylex();
+
   int i, l, type, value;
 
   pListMoveToStart(&L1);
 
-  printf("INPUT\n");
-
   l = pListLength(&L1);
   pListMoveToStart(&L1);
-  for (i = 0; i < l; i++){
-    type = pListGetValue(&L1).type;
-    value = pListGetValue(&L1).value;
 
-    if (type == STMT_TYPE){
-      printf(" %c ", value);
-    } else if (type == OPERATOR_TYPE) {
-      if (value == AND_VALUE){
-        printf(" & ");
-      } else if (value == OR_VALUE){
-        printf(" || ");
-      } else {
-        printf(" -> ");
-      }
-    } else if (type == NEGATION_TYPE){
-      printf(" ~ ");
-    } else if (type == LPAR_TYPE) {
-      printf(" ( ");
-    } else if (type == RPAR_TYPE) {
-      printf(" ) ");
-    } 
+  if (argc >= 2 && strcmp(argv[1], "-V") == 0){
 
-    pListNext(&L1);
+    printf("\\documentclass[16pt]{report}\n");
+    printf("\\pagestyle{empty}\n");
+    printf("\\begin{document}\n");
+    
+    printf("$$");
+    
+    for (i = 0; i < l; i++){
+      type = pListGetValue(&L1).type;
+      value = pListGetValue(&L1).value;
+
+      if (type == STMT_TYPE){
+        printf(" %c ", value);
+      } else if (type == OPERATOR_TYPE) {
+        if (value == AND_VALUE){
+          printf(" \\wedge ");
+        } else if (value == OR_VALUE){
+          printf(" \\wee ");
+        } else {
+          printf(" \\rightarrow ");
+        }
+      } else if (type == NEGATION_TYPE){
+        printf(" \\neg ");
+      } else if (type == LPAR_TYPE) {
+        printf(" ( ");
+      } else if (type == RPAR_TYPE) {
+        printf(" ) ");
+      } 
+
+      pListNext(&L1);
+    }
+
+    printf("$$\n");
+
   }
-
-  printf("\nIMPL_FREE\n");
 
   pListInit(&L2);
   IMPL_FREE(&L1, &L2, 0, pListLength(&L1)-1);
 
-  
-  l = pListLength(&L2);
-  pListMoveToStart(&L2);
-  for (i = 0; i < l; i++){
-    type = pListGetValue(&L2).type;
-    value = pListGetValue(&L2).value;
+  if (argc >= 2 && strcmp(argv[1], "-V") == 0){
+    printf("$$");  
 
-    if (type == STMT_TYPE){
-      printf(" %c ", value);
-    } else if (type == OPERATOR_TYPE) {
-      if (value == AND_VALUE){
-        printf(" & ");
-      } else if (value == OR_VALUE){
-        printf(" || ");
-      } else {
-        printf(" -> ");
-      }
-    } else if (type == NEGATION_TYPE){
-      printf(" ~ ");
-    } else if (type == LPAR_TYPE) {
-      printf(" ( ");
-    } else if (type == RPAR_TYPE) {
-      printf(" ) ");
-    } 
+    l = pListLength(&L2);
+    pListMoveToStart(&L2);
+    for (i = 0; i < l; i++){
+      type = pListGetValue(&L2).type;
+      value = pListGetValue(&L2).value;
 
-    pListNext(&L2);
+      if (type == STMT_TYPE){
+        printf(" %c ", value);
+      } else if (type == OPERATOR_TYPE) {
+        if (value == AND_VALUE){
+          printf(" \\wedge ");
+        } else if (value == OR_VALUE){
+          printf(" \\wee ");
+        } else {
+          printf(" \\rightarrow ");
+        }
+      } else if (type == NEGATION_TYPE){
+        printf(" \\neg ");
+      } else if (type == LPAR_TYPE) {
+        printf(" ( ");
+      } else if (type == RPAR_TYPE) {
+        printf(" ) ");
+      } 
+
+      pListNext(&L2);
+    }
+
+    printf("$$\n");
+
   }
-
-  printf("\nNNF\n");
 
   tLinkedList L3;
   pListInit(&L3);
   NNF(&L2, &L3, 0, pListLength(&L2)-1);
 
-  l = pListLength(&L3);
-  pListMoveToStart(&L3);
-  for (i = 0; i < l; i++){
-    type = pListGetValue(&L3).type;
-    value = pListGetValue(&L3).value;
 
-    if (type == STMT_TYPE){
-      printf(" %c ", value);
-    } else if (type == OPERATOR_TYPE) {
-      if (value == AND_VALUE){
-        printf(" & ");
-      } else if (value == OR_VALUE){
-        printf(" || ");
-      } else {
-        printf(" -> ");
-      }
-    } else if (type == NEGATION_TYPE){
-      printf(" ~ ");
-    } else if (type == LPAR_TYPE) {
-      printf(" ( ");
-    } else if (type == RPAR_TYPE) {
-      printf(" ) ");
-    } 
+  if (argc >= 2 && strcmp(argv[1], "-V") == 0){
 
-    pListNext(&L3);
+    printf("$$");
+
+    l = pListLength(&L3);
+    pListMoveToStart(&L3);
+    for (i = 0; i < l; i++){
+      type = pListGetValue(&L3).type;
+      value = pListGetValue(&L3).value;
+
+      if (type == STMT_TYPE){
+        printf(" %c ", value);
+      } else if (type == OPERATOR_TYPE) {
+        if (value == AND_VALUE){
+          printf(" \\wedge ");
+        } else if (value == OR_VALUE){
+          printf(" \\wee ");
+        } else {
+          printf(" \\rightarrow ");
+        }
+      } else if (type == NEGATION_TYPE){
+        printf(" \\neg ");
+      } else if (type == LPAR_TYPE) {
+        printf(" ( ");
+      } else if (type == RPAR_TYPE) {
+        printf(" ) ");
+      } 
+
+      pListNext(&L3);
+    }
+
+    printf("$$\n");
   }
 
-  printf("\nCNF\n");
+  printf("$$");
 
   tLinkedList L4;
   pListInit(&L4);
@@ -2153,14 +2176,14 @@ int yywrap() {
       printf(" %c ", value);
     } else if (type == OPERATOR_TYPE) {
       if (value == AND_VALUE){
-        printf(" & ");
+        printf(" \\wedge ");
       } else if (value == OR_VALUE){
-        printf(" || ");
+        printf(" \\wee ");
       } else {
-        printf(" -> ");
+        printf(" \\rightarrow ");
       }
     } else if (type == NEGATION_TYPE){
-      printf(" ~ ");
+      printf(" \\neg ");
     } else if (type == LPAR_TYPE) {
       printf(" ( ");
     } else if (type == RPAR_TYPE) {
@@ -2169,8 +2192,10 @@ int yywrap() {
 
     pListNext(&L4);
   }
+  printf("$$\n");
+  printf("\\end{document}");
 
-  return 1;
+  return 0;
 }
 
 void IMPL_FREE(tLinkedList *list, tLinkedList *resultList, int start, int end){
@@ -2771,7 +2796,6 @@ void dNNF(tLinkedList *list, tLinkedList *resultList, int start, int end){
 }
 
 void CNF(tLinkedList *list, tLinkedList *resultList, int start, int end){
-  printf("CNF: %d %d\n", start, end);
   pListMoveToPos(list,start);
 
   pListItem statement;
