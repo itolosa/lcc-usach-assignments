@@ -234,17 +234,46 @@ void NNF(tLinkedList *list, tLinkedList *resultList, int start, int end);
 void dNNF(tLinkedList *list, tLinkedList *resultList, int start, int end);
 
 int yywrap() {
+  int i, l, type, value;
+
   pListMoveToStart(&L1);
 
-  printf("IMPL_FREE\n");
-  int type;
-  int value;
+  printf("INPUT\n");
+
+  l = pListLength(&L1);
+  pListMoveToStart(&L1);
+  for (i = 0; i < l; i++){
+    type = pListGetValue(&L1).type;
+    value = pListGetValue(&L1).value;
+
+    if (type == STMT_TYPE){
+      printf(" %c ", value);
+    } else if (type == OPERATOR_TYPE) {
+      if (value == AND_VALUE){
+        printf(" & ");
+      } else if (value == OR_VALUE){
+        printf(" || ");
+      } else {
+        printf(" -> ");
+      }
+    } else if (type == NEGATION_TYPE){
+      printf(" ~ ");
+    } else if (type == LPAR_TYPE) {
+      printf(" ( ");
+    } else if (type == RPAR_TYPE) {
+      printf(" ) ");
+    } 
+
+    pListNext(&L1);
+  }
+
+  printf("\nIMPL_FREE\n");
 
   pListInit(&L2);
   IMPL_FREE(&L1, &L2, 0, pListLength(&L1)-1);
 
-  int i;
-  int l = pListLength(&L2);
+  
+  l = pListLength(&L2);
   pListMoveToStart(&L2);
   for (i = 0; i < l; i++){
     type = pListGetValue(&L2).type;
@@ -377,7 +406,7 @@ void IMPL_FREE(tLinkedList *list, tLinkedList *resultList, int start, int end){
           left_parenthesis.value = pListGetValue(list).value;
           pListAppend(resultList, left_parenthesis);
 
-          IMPL_FREE(list, resultList, start+2, end);
+          IMPL_FREE(list, resultList, start+4, end-1);
 
           right_parenthesis.type = RPAR_TYPE;
           right_parenthesis.value = pListGetValue(list).value;
@@ -398,7 +427,24 @@ void IMPL_FREE(tLinkedList *list, tLinkedList *resultList, int start, int end){
       negation.value = DUMMY_VALUE;
       pListAppend(resultList, negation);
 
-      IMPL_FREE(list, resultList, start+1, end);
+      /* Check next item */
+      pListNext(list);
+
+      if (pListGetValue(list).type == STMT_TYPE){
+        IMPL_FREE(list, resultList, start+1, end);
+      } else if (pListGetValue(list).type == LPAR_TYPE) {
+        left_parenthesis.type = LPAR_TYPE;
+        left_parenthesis.value = pListGetValue(list).value;
+        pListAppend(resultList, left_parenthesis);
+
+        IMPL_FREE(list, resultList, start+2, end-1);
+
+        right_parenthesis.type = RPAR_TYPE;
+        right_parenthesis.value = pListGetValue(list).value;
+        pListAppend(resultList, right_parenthesis);
+      } else {
+        printf("Malformed Expression!!\n"); printf("Start: %d & End: %d", start, end);
+      }
       
     /* if Left Parenthesis */
     } else if (pListGetValue(list).type == LPAR_TYPE){
@@ -508,6 +554,7 @@ void NNF(tLinkedList *list, tLinkedList *resultList, int start, int end){
   pListItem and;
   pListItem or;
   pListItem negation;
+  pListItem operator;
 
   /* if Statement */
   if (start >= end-1){
@@ -578,15 +625,42 @@ void NNF(tLinkedList *list, tLinkedList *resultList, int start, int end){
         }
       } else if (pListGetValue(list).type == STMT_TYPE){
         pListAppend(resultList, negation);
-        NNF(list, resultList, start+1, end);
+
+        statement.type = STMT_TYPE;
+        statement.value = pListGetValue(list).value;
+
+        pListAppend(resultList, statement);
+
+        if (start+1 < end){
+          pListNext(list);
+
+          if (pListGetValue(list).type == OPERATOR_TYPE){
+            operator.type = pListGetValue(list).type;
+            operator.value = pListGetValue(list).value;
+
+            pListAppend(resultList,operator);
+
+            pListNext(list);
+            if (pListGetValue(list).type == LPAR_TYPE){
+              NNF(list, resultList, start+4, end-1);
+            } else {
+              NNF(list, resultList, start+3, end);
+            }
+          } else {
+            printf("Malformed Expression!!\n"); printf("Start: %d & End: %d", start, end);
+            exit(0);
+          }
+        }
       } else if (pListGetValue(list).type == LPAR_TYPE){
         left_parenthesis.type = LPAR_TYPE;
         left_parenthesis.value = pListGetValue(list).value;
+        pListAppend(resultList, left_parenthesis);
         
         dNNF(list, resultList, start+2, end-1);
 
         right_parenthesis.type = RPAR_TYPE;
         right_parenthesis.value = pListGetValue(list).value;
+        pListAppend(resultList, right_parenthesis);
       }
     } else if (pListGetValue(list).type == LPAR_TYPE){
       int START_PARENTHESIS = start;
@@ -607,7 +681,7 @@ void NNF(tLinkedList *list, tLinkedList *resultList, int start, int end){
               left_parenthesis.value = PARENTHESIS_LEVEL;
               pListAppend(resultList, left_parenthesis);
 
-              IMPL_FREE(list, resultList, START_PARENTHESIS+1, END_PARENTHESIS-1);
+              NNF(list, resultList, START_PARENTHESIS+1, END_PARENTHESIS-1);
 
               right_parenthesis.type = RPAR_TYPE;
               right_parenthesis.value = PARENTHESIS_LEVEL;
@@ -621,7 +695,7 @@ void NNF(tLinkedList *list, tLinkedList *resultList, int start, int end){
               left_parenthesis.value = PARENTHESIS_LEVEL;
               pListAppend(resultList, left_parenthesis);
 
-              IMPL_FREE(list, resultList, START_PARENTHESIS+1, END_PARENTHESIS-1);
+              NNF(list, resultList, START_PARENTHESIS+1, END_PARENTHESIS-1);
 
               right_parenthesis.type = RPAR_TYPE;
               right_parenthesis.value = PARENTHESIS_LEVEL;
@@ -673,9 +747,14 @@ void dNNF(tLinkedList *list, tLinkedList *resultList, int start, int end){
   pListItem and;
   pListItem or;
   pListItem negation;
+  pListItem operator;
 
   /* if Statement */
   if (start >= end-1){
+    negation.type = NEGATION_TYPE;
+    negation.value = DUMMY_VALUE;
+    pListAppend(resultList, negation);
+
     statement.type = STMT_TYPE;
     statement.value = pListGetValue(list).value;
 
@@ -683,11 +762,7 @@ void dNNF(tLinkedList *list, tLinkedList *resultList, int start, int end){
     return;
   } else {
     if (pListGetValue(list).type == STMT_TYPE){
-      negation.type = NEGATION_TYPE;
-      negation.value = DUMMY_VALUE;
-      pListAppend(resultList, negation);
-
-      NNF(list, resultList, start, start+1);
+      dNNF(list, resultList, start, start+1);
 
       pListMoveToPos(list, start);
       /* Check Operator */
@@ -739,7 +814,7 @@ void dNNF(tLinkedList *list, tLinkedList *resultList, int start, int end){
         pListNext(list);
 
         if (pListGetValue(list).type == STMT_TYPE){
-          NNF(list, resultList, start+2, end);
+          dNNF(list, resultList, start+2, end);
         } else if (pListGetValue(list).type == LPAR_TYPE){
           NNF(list, resultList, start+2, end-1);
         } else {
@@ -747,10 +822,39 @@ void dNNF(tLinkedList *list, tLinkedList *resultList, int start, int end){
           exit(0);
         }
       } else if (pListGetValue(list).type == STMT_TYPE){
-        pListAppend(resultList, negation);
-        NNF(list, resultList, start+1, end);
+        statement.type = STMT_TYPE;
+        statement.value = pListGetValue(list).value;
+
+        pListAppend(resultList, statement);
+
+        if (start+1 < end){
+          pListNext(list);
+
+          if (pListGetValue(list).type == OPERATOR_TYPE){
+            operator.type = pListGetValue(list).type;
+            operator.value = pListGetValue(list).value;
+
+            if (operator.value == AND_VALUE){
+              operator.value = OR_VALUE;
+            } else {
+              operator.value = AND_VALUE;
+            }
+
+            pListAppend(resultList,operator);
+
+            pListNext(list);
+            if (pListGetValue(list).type == LPAR_TYPE){
+              dNNF(list, resultList, start+4, end-1);
+            } else {
+              dNNF(list, resultList, start+3, end);
+            }
+          } else {
+            printf("Malformed Expression!!\n"); printf("Start: %d & End: %d", start, end);
+            exit(0);
+          }
+        }
       } else if (pListGetValue(list).type == LPAR_TYPE){
-        dNNF(list, resultList, start+2, end-1);
+        NNF(list, resultList, start+2, end-1);
       }
     } else if (pListGetValue(list).type == LPAR_TYPE){
       int START_PARENTHESIS = start;
