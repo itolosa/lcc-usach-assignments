@@ -1,6 +1,10 @@
 INPUT
- (  (  (  p  ->  q  )  ||  (  p  ->  ~  (  p  ->  r  )  )  )  &  (  r  ->  p  )  )  &  (  ~  p  ->  q  ) 
+ p  ->  q 
 IMPL_FREE
- (  (  (  ~  p  ||  q  )  ||  (  ~  p  ||  ~  (  ~  p  ||  r  )  )  )  &  (  ~  r  ||  p  )  )  &  (  ~  ~  p  ||  q  ) 
+ ~  p  ||  q 
 NNF
- (  (  (  ~  p  ||  q  )  ||  (  ~  p  ||  (  p  &  ~  r  )  )  )  &  (  ~  r  ||  p  )  )  &  (  p  ||  q  ) 
+ ~  p  ||  q 
+CNF
+CNF: 0 3
+CNF: 1 3
+ ~  p  ||  q 
